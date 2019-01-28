@@ -22,7 +22,7 @@ class StaticPagesControllerTest < ActionDispatch::IntegrationTest
     # ステータスコード 200
     assert_response :success
     # タイトルにこれが表示してるかチェック
-    assert_select "title", "Home | #{@base_title}"
+    assert_select "title", "#{@base_title}"
   end
 
   # GETリクエストで、helpページが200かチェック
@@ -42,13 +42,6 @@ class StaticPagesControllerTest < ActionDispatch::IntegrationTest
 
   # GETリクエストで、contactページがあるか
   test "should get contact" do
-    get static_pages_contact_url
-    assert_response :success
-    assert_select "title", "Contact | #{@base_title}"
-  end
-
-  # GETリクエストで、contactページがあるか
-  test "should get user" do
     get static_pages_contact_url
     assert_response :success
     assert_select "title", "Contact | #{@base_title}"
