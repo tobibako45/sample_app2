@@ -47,5 +47,12 @@ class StaticPagesControllerTest < ActionDispatch::IntegrationTest
     assert_select "title", "Contact | #{@base_title}"
   end
 
+  # GETリクエストで、contactページがあるか
+  test "should get user" do
+    get static_pages_contact_url
+    assert_response :success
+    assert_select "title", "Contact | #{@base_title}"
+  end
+
 
 end
