@@ -12,7 +12,7 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
     # User.countが変わっていなければ成功
     assert_no_difference 'User.count' do
       # POSTリクエスト送信（POSTなのでcreateアクションに）
-      post signup_path, params: {
+      post users_path, params: {
           user: {
               name: "",
               email: "user@invalid",
@@ -60,6 +60,9 @@ class UsersSignupTest < ActionDispatch::IntegrationTest
     assert_template 'users/show'
     # flashメッセージが空でないことを確認
     assert_not flash.empty?
+
+    # ユーザー登録後のログインしたかチェック
+    assert is_logged_in?
   end
 
 

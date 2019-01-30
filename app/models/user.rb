@@ -20,12 +20,20 @@ class User < ApplicationRecord
   # パスワードのハッシュ化。bcrypt gemを追加したことで使える
   has_secure_password
   validates :password, presence: true, length: {minimum: 6}
+
+  # :case_sensitiveオプションを用いて、
+  # 大文字小文字の違いを確認する制約をかけるかどうかを定義することもできます。
+  # デフォルトでは、このオプションはtrueになります。
+
+
+
+
+
+  # 渡された文字列のハッシュ値を返す
+  def User.digest(string)
+    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
+               BCrypt::Engine.cost
+    BCrypt::Password.create(string, cost: cost)
+  end
+
 end
-
-# :case_sensitiveオプションを用いて、
-# 大文字小文字の違いを確認する制約をかけるかどうかを定義することもできます。
-# デフォルトでは、このオプションはtrueになります。
-
-
-
-

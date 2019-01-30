@@ -15,6 +15,11 @@ class ActiveSupport::TestCase
 
   # Add more helper methods to be used by all tests here...
 
+  # テストユーザーがログイン中の場合にtrueを返す。
+  # session_helperのlogged_in?メソッドと役割は一緒。こっちはテスト用
+  def is_logged_in?
+    !session[:user_id].nil?
+  end
 
 
 

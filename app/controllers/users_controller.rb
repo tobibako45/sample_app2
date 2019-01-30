@@ -15,6 +15,9 @@ class UsersController < ApplicationController
     # Strong Parametersで、指定した属性意外は許可しない
     @user = User.new(user_params)
     if @user.save
+
+      # 登録したらログインさせる
+      log_in @user
       flash[:success] = 'Welcome to the Sample App'
       # redirect_to user_url(@user) # 下と同じ。railsが推察してやってくれる
       redirect_to @user
