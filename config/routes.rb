@@ -1,8 +1,5 @@
 Rails.application.routes.draw do
 
-  # get 'users/new'
-  get '/signup', to: 'users#new'
-
   # root 'application#hello'
   root 'static_pages#home'
 
@@ -12,4 +9,11 @@ Rails.application.routes.draw do
   get '/about', to: 'static_pages#about' #=> about_path
   # get 'static_pages/contact'
   get '/contact', to: 'static_pages#contact' #=> contact_path
+
+
+  get '/signup', to: 'users#new'
+  post '/signup', to: 'users#create'
+
+  resources :users
+
 end
