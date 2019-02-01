@@ -140,4 +140,15 @@ class UserTest < ActiveSupport::TestCase
   end
 
 
+  # ダイジェストが存在しない場合のauthenticated?のテスト
+  test "authenticated? should return false for a user with nil digest" do
+
+    # authenticated?は、渡された引数がremember_digestと一致したらtrueを返すから、
+    # 引数をnilにしてfalseを返すか確認
+    assert_not @user.authenticated?('')
+
+  end
+
+
+
 end
