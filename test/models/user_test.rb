@@ -117,38 +117,27 @@ class UserTest < ActiveSupport::TestCase
     assert_equal mixed_case_email.downcase, @user.reload.email
   end
 
-
   # パスワードが存在するはずです（空白ではありません）
   test "password should be present (nonblank)" do
-
     # 多重代入 @user.passwordと@user.password_confirmationに、空文字 * 6 を代入
     @user.password = @user.password_confirmation = " " * 6
     # 有効で無いことを確認
     assert_not @user.valid?
-
   end
-
 
   # パスワードは最小長でなければなりません
   test "password should have a minimum length" do
-
     # 多重代入 @user.passwordと@user.password_confirmationに、a * 5 を代入
     @user.password = @user.password_confirmation = "a" * 5
     # 有効でないこと確認
     assert_not @user.valid?
-
   end
-
 
   # ダイジェストが存在しない場合のauthenticated?のテスト
   test "authenticated? should return false for a user with nil digest" do
-
     # authenticated?は、渡された引数がremember_digestと一致したらtrueを返すから、
     # 引数をnilにしてfalseを返すか確認
     assert_not @user.authenticated?('')
-
   end
-
-
 
 end

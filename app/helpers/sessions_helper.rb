@@ -17,6 +17,12 @@ module SessionsHelper
   end
 
 
+  # 渡されたユーザーがログイン済みユーザーであればtrueを返す
+  def current_user?(user)
+    user == current_user
+  end
+
+
   # 現在ログイン中のユーザーを返す
 
   # 現在ログイン中のユーザーを返す（いる場合）
@@ -28,22 +34,21 @@ module SessionsHelper
   #   end
   # end
 
-  # 上はsessionだけ
+  # 上はsessionで一時保持だけ
 
 
-  # 記憶トークンcookieに対応するユーザーを返す
+  # 記憶トークンcookieに対応するユーザーIDを返す
   def current_user
     #  session[:user_id]に値がある場合
     if (user_id = session[:user_id])
+
       # session[:user_id]で検索して、@current_userが空の時は、Userから検索して代入。
       @current_user ||= User.find_by(id: user_id)
 
     elsif (user_id = cookies.signed[:user_id]) # cookies[:user_id]に値がある場合は、signedで取り出して
 
-
       # テストがパスすれば、この部分がテストされていないことがわかる
       # raise
-
 
       # cookies[:user_id]で検索
       user = User.find_by(id: user_id)
@@ -89,5 +94,22 @@ module SessionsHelper
     @current_user = nil
   end
 
+
+  # 記憶したURL（もしくはデフォルト値）にリダイレクト
+  # sessionコントローラのcreateアクションに追加
+  def redirect_back_or(default)
+    # 値がnilでなければsession[:forwarding_url]を評価し、そうでなければデフォルトのURL
+    redirect_to(session[:forwarding_url] || default)
+    # 次回ログインした時に備えて、転送用URLを削除する
+    session.delete(:forwarding_url)
+  end
+
+
+  # アクセスしようとしたURLを覚えておく
+  # usersコントロラーのlogged_in_userメソッドに追加。before_actionでログイン済みかチェックする時に。
+  def store_location
+    # GETリクエストの場合のみ、request.original_urlをsession変数の:forwarding_urlキーに格納する。（記憶しておく）
+    session[:forwarding_url] = request.original_url if request.get?
+  end
 
 end

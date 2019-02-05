@@ -11,8 +11,13 @@ class ActiveSupport::TestCase
   # app/helpers/application_helper.rbを呼び出し
   include ApplicationHelper
 
+  #
+
+
   # Add more helper methods to be used by all tests here...
   # すべてのテストで使用されるヘルパーメソッドをここに追加
+
+
 
 
   # テストユーザーがログイン中の場合にtrueを返す。
@@ -28,6 +33,9 @@ class ActiveSupport::TestCase
   end
 
 end
+
+
+
 
 
 # 統合テスト用クラス

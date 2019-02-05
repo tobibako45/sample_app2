@@ -10,4 +10,5 @@ class ApplicationHelperTest < ActionView::TestCase
     # full_titleと、"Help | Ruby on Rails Tutorial Sample App"が同じことを確認
     assert_equal full_title("Help"), "Help | Ruby on Rails Tutorial Sample App"
   end
+
 end

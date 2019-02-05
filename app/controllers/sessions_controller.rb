@@ -1,6 +1,7 @@
 class SessionsController < ApplicationController
-  def new
 
+  def new
+    # debugger
   end
 
   def create
@@ -21,13 +22,17 @@ class SessionsController < ApplicationController
       # ここでのrememberとforgetはhelperのやつ。
       # そこでmodelのrememberとforgetを実行している。
 
-
-      # (byebug)
+      # debugger
 
       # user_url(@user)同じ。すなわち、ユーザー詳細(show)にリダイレクト
-      redirect_to @user
+      # redirect_to @user
+
+      # 記憶したURL（もしくはデフォルト値）にリダイレクト（フレンドリーフォワーディング）
+      redirect_back_or @user
+
     else
-      flash.now[:danger] = 'Invalid email/password combination　無効なメールアドレスとパスワードの組み合わせ'
+
+      flash.now[:danger] = 'Invalid email/password combination  無効なメールアドレスとパスワードの組み合わせ'
       render 'new'
 
     end

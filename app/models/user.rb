@@ -1,15 +1,11 @@
 class User < ApplicationRecord
 
-
   attr_accessor :remember_token
-
 
   # before_save オブジェクトがDBに保存される直前で実行。INSERT、UPDATE両方で実行
   # このselfは、現在のユーザーを指す
   # before_save { self.email = email.downcase} # .downcase 少文字に変換。
-
   before_save {email.downcase!} # .downcase!で直接変更できる。
-
 
   validates :name, presence: true, length: {maximum: 50}
 
@@ -23,11 +19,22 @@ class User < ApplicationRecord
 
   # パスワードのハッシュ化。bcrypt gemを追加したことで使える
   has_secure_password
-  validates :password, presence: true, length: {minimum: 6}
+  # validates :password, presence: true, length: {minimum: 6}
+
+  # 空の時に例外処理を加える
+  validates :password, presence: true, length: {minimum: 6}, allow_nil: true
 
   # :case_sensitiveオプションを用いて、
   # 大文字小文字の違いを確認する制約をかけるかどうかを定義することもできます。
   # デフォルトでは、このオプションはtrueになります。
+  #
+  #
+  # allow_nil: trueで、
+  # 新規ユーザー登録時に空のパスワードが有効になってしまうのかと心配になるかもしれませんが、安心してください。
+  # has_secure_passwordでは (追加したバリデーションとは別に) オブジェクト生成時に存在性を検証するようになっているため、
+  # 空のパスワード (nil) が新規ユーザー登録時に有効になることはありません。
+  # (空のパスワードを入力すると存在性のバリデーションとhas_secure_passwordによるバリデーションがそれぞれ実行され、
+  # 2つの同じエラーメッセージが表示されるというバグがありましたが、これで解決できました。)
 
 
   # 渡された文字列のハッシュ値を返す
@@ -42,7 +49,6 @@ class User < ApplicationRecord
     # base64 トークンジェネレーター
     SecureRandom.urlsafe_base64
   end
-
 
   # 永続セッションのためにユーザーをデータベースに記憶する
   def remember
@@ -59,7 +65,6 @@ class User < ApplicationRecord
   end
 
 
-
   # 渡されたトークンがダイジェストと一致したらtrueを返す
   def authenticated?(remember_token) # このremember_tokenは、accessorのではなく、引数のローカル変数
 
@@ -72,16 +77,11 @@ class User < ApplicationRecord
   end
 
 
-
   # ユーザーのログイン情報を破棄する
   def forget
     # DBのremember_digest属性をnilに更新する
     update_attribute(:remember_digest, nil)
   end
-
-
-
-
 
 
 end

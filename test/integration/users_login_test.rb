@@ -2,11 +2,9 @@ require 'test_helper'
 
 class UsersLoginTest < ActionDispatch::IntegrationTest
 
-
   def setup
     @user = users(:michael)
   end
-
 
   # invalidな情報でログイン
   test "login with invalid information" do
@@ -60,7 +58,6 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
 
   end
 
-
   # ユーザーログアウトのテスト
   # 有効な情報でログインし、その後ログアウトする
   test "login with valid information followed by logout" do
@@ -110,11 +107,6 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
 
   end
 
-
-
-
-
-
   # [remember me] チェックボックスのテスト
 
   # remember_tokenがnilではないことを確認
@@ -126,7 +118,6 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     # assert_not_empty cookies['remember_token']
     #
     # assignsメソッドを使わなかった場合
-
 
     # cookies['remember_token']とremember_tokenが等しいか確認
     assert_equal cookies['remember_token'], assigns(:user).remember_token
