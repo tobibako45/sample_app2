@@ -1,0 +1,25 @@
+Hi <%= @user.name %>
+
+サンプルアプリへようこそ！アカウントを有効にするには、下のリンクをクリックしてください。
+
+Welcome to the Sample App! Click on the link below to activate your account:
+
+<%= edit_account_activation_url(@user.activation_token, email: @user.email) %>
+
+
+
+備忘録
+
+
+edit_user_url(user)が、http://www.example.com/users/1/editのような具合に、
+
+dit_account_activation_url(@user.activation_token, email: @user.email) も、
+
+account_activations/Base64でエンコードされた文字/edit?email=foo%40example.com
+
+%40で@をエスケープ
+
+このようにして名前付きルートでクエリパラメータを定義すると、
+Railsが特殊な文字を自動的にエスケープしてくれます。
+コントローラでparams[:email]からメールアドレスを取り出すときには、
+自動的にエスケープを解除してくれます。

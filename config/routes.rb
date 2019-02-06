@@ -22,4 +22,8 @@ Rails.application.routes.draw do
 
   resources :users
 
+  # アカウント有効化(editアクションを追加)
+  resources :account_activations, only: [:edit]
+
+
 end

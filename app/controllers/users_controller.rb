@@ -17,11 +17,17 @@ class UsersController < ApplicationController
     # @users = User.all
 
     # ページネーション
-    @users = User.paginate(page: params[:page])
+    # @users = User.paginate(page: params[:page])
+
+    # アカウントが有効なユーザーだけ
+    @users = User.where(activated: true).paginate(page: params[:page])
   end
+
 
   def show
     @user = User.find(params[:id])
+    # アカウントが有効なユーザーだけ表示、他はroot_urlにリダイレクト
+    redirect_to root_url and return unless @user.activated?
     # debugger
   end
 
@@ -36,11 +42,22 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
 
     if @user.save
+      # アカウント有効化前
+
       # 登録したらログインさせる
-      log_in @user
-      flash[:success] = 'Welcome to the Sample App'
+      # log_in @user
+      # flash[:success] = 'Welcome to the Sample App'
       # redirect_to user_url(@user) # 下と同じ。railsが推察してやってくれる
-      redirect_to @user
+      # redirect_to @user
+
+      # アカウント有効化メールを送信。deliver_nowは、メールを送信するメソッド。
+      # UserMailer.account_activation(@user).deliver_now
+      # 上をモデルにメソッド化
+      @user.send_activation_email
+
+      flash[:info] = "Please check your email to activate your account. アカウントを有効にするには、メールを確認してください"
+      # 有効化メールの送信後、root_urlにリダイレクト
+      redirect_to root_url
     else
       render 'new'
     end

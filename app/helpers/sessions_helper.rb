@@ -54,7 +54,10 @@ module SessionsHelper
       user = User.find_by(id: user_id)
 
       # userがtrue、cookies[:remember_token]がremember_digestと一致したらtrue の場合
-      if user && user.authenticated?(cookies[:remember_token])
+      # if user && user.authenticated?(cookies[:remember_token])
+
+      # authenticated?の抽象化版
+      if user && user.authenticated?(:remember, cookies[:remember_token])
         # ログインする
         log_in user
         # @current_userにuserを代入

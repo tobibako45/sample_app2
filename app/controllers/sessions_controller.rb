@@ -11,30 +11,36 @@ class SessionsController < ApplicationController
     # userがtrue、@user.password_digestとparams[:session][:password]を比較した値がtrue な時
     if @user && @user.authenticate(params[:session][:password])
 
-      # ユーザーにログインする
-      log_in @user
+      # アカウントが有効かどうか
+      if @user.activated?
+        # ユーザーにログインする
+        log_in @user
+        # ログインしてユーザーを保持する
 
-      # ログインしてユーザーを保持する
+        # remember_meにチェックがはいっていたら、cookiesにuser_idとremember_tokenを記憶する
+        # はいってなければ、cookiesを破棄（記憶しないようにする）
+        params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
+        # ここでのrememberとforgetはhelperのやつ。
+        # そこでmodelのrememberとforgetを実行している。
+        # debugger
 
-      # remember_meにチェックがはいっていたら、cookiesにuser_idとremember_tokenを記憶する
-      # はいってなければ、cookiesを破棄（記憶しないようにする）
-      params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
-      # ここでのrememberとforgetはhelperのやつ。
-      # そこでmodelのrememberとforgetを実行している。
+        # user_url(@user)同じ。すなわち、ユーザー詳細(show)にリダイレクト
+        # redirect_to @user
+        # 記憶したURL（もしくはデフォルト値）にリダイレクト（フレンドリーフォワーディング）
+        redirect_back_or @user
 
-      # debugger
+      else
+        # 有効でないユーザーがログインすることのないようにする
 
-      # user_url(@user)同じ。すなわち、ユーザー詳細(show)にリダイレクト
-      # redirect_to @user
-
-      # 記憶したURL（もしくはデフォルト値）にリダイレクト（フレンドリーフォワーディング）
-      redirect_back_or @user
+        message = "Account not activated. アカウントが有効になっていません。"
+        message += "Check your email for the activation link.　アクティベーションリンクについては、メールを確認してください。"
+        flash[:warning] = message
+        redirect_to root_url
+      end
 
     else
-
       flash.now[:danger] = 'Invalid email/password combination  無効なメールアドレスとパスワードの組み合わせ'
       render 'new'
-
     end
   end
 
