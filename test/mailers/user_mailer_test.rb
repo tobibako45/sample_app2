@@ -25,13 +25,24 @@ class UserMailerTest < ActionMailer::TestCase
   end
 
 
-  #
-  # test "password_reset" do
-  #   mail = UserMailer.password_reset
-  #   assert_equal "Password reset", mail.subject
-  #   assert_equal ["to@example.org"], mail.to
-  #   assert_equal ["from@example.com"], mail.from
-  #   assert_match "Hi", mail.body.encoded
-  # end
+  # パスワード再設定用メイラーメソッドのテスト
+  test "password_reset" do
+    # テストユーザーをセット
+    user = users(:michael)
+    # テストユーザーのパスワード再設定トークンを生成
+    user.reset_token = User.new_token
+    # パスワード再設定メールを送信
+    mail = UserMailer.password_reset(user)
+    # mail.subjectと"Password reset"が一致するかチェック
+    assert_equal "Password reset", mail.subject
+    # mail.toと[user.email]が一致するかチェック
+    assert_equal [user.email], mail.to
+    # mail.formと["noreply@example.com"]が一致するかチェック
+    assert_equal ["noreply@example.com"], mail.from
+    # テストユーザのパスワード再設定トークンが、エンコードされたメール本文内に存在するかチェック
+    assert_match user.reset_token,        mail.body.encoded
+    # テストユーザのアドレスがエスケープされて、エンコードされたメール本文に含まれているかチェックする
+    assert_match CGI.escape(user.email),  mail.body.encoded
+  end
 
 end

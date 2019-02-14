@@ -2,8 +2,8 @@ class User < ApplicationRecord
 
   # remember_token 永続セッションに使う
   # activation_token 有効化に使う
-  attr_accessor :remember_token, :activation_token
-
+  # reset_token パスワード再設定に使う
+  attr_accessor :remember_token, :activation_token, :reset_token
 
   # before_save オブジェクトがDBに保存される直前で実行。INSERT、UPDATE両方で実行
   # このselfは、現在のユーザーを指す
@@ -37,7 +37,6 @@ class User < ApplicationRecord
   # :case_sensitiveオプションを用いて、
   # 大文字小文字の違いを確認する制約をかけるかどうかを定義することもできます。
   # デフォルトでは、このオプションはtrueになります。
-  #
   #
   # allow_nil: trueで、
   # 新規ユーザー登録時に空のパスワードが有効になってしまうのかと心配になるかもしれませんが、安心してください。
@@ -88,11 +87,11 @@ class User < ApplicationRecord
   # トークンがダイジェストと一致したらtrueを返す
   # sendメソッドで抽象化
   def authenticated?(attribute, token)
-    # sendメソッドに渡すシンボルは、atributeとして引数に追加する。
-    digest = send("#{attribute}_digest")
-    # もう1つの引数であるtokenは他の認証でも使えるように、名称を一般化している。
-    return  false if digest.nil?
+    # sendメソッドに渡すシンボルは、attributeとして引数に追加する。
     # sendメソッドは、self.sendでも呼べるが、Userモデル内であるため省略している。
+    # もう1つの引数であるtokenは他の認証でも使えるように、名称を一般化している。
+    digest = send("#{attribute}_digest")
+    return false if digest.nil?
     BCrypt::Password.new(digest).is_password?(token)
   end
 
@@ -103,7 +102,7 @@ class User < ApplicationRecord
   end
 
 
-# アカウントを有効化する
+  # アカウントを有効化する
   def activate
     # 有効化ステータスをtrueに更新する
     # update_attribute(:activated, true)
@@ -120,7 +119,29 @@ class User < ApplicationRecord
     UserMailer.account_activation(self).deliver_now
   end
 
+  # パスワード再設定の属性を設定する
+  def create_reset_digest
+    # self.reset_tokenはattr_accessorで追加したやつ。DBにないから
+    self.reset_token = User.new_token
+    # DBのreset_digestとreset_sent_atを更新
 
+    update_columns(reset_digest: User.digest(reset_token), reset_sent_at: Time.zone.now)
+  end
+
+
+  # パスワード再設定のメールを送信する
+  def send_password_reset_email
+    # deliver_nowは、メールを送信するメソッド。
+    UserMailer.password_reset(self).deliver_now
+  end
+
+
+
+  # パスワード再設定の期限が切れている場合はtrueを返す
+  def password_reset_expired?
+    # 現在時刻より２時間以上前(早い)場合
+    reset_sent_at < 2.hours.ago
+  end
 
 
 
@@ -140,9 +161,6 @@ class User < ApplicationRecord
     # self.activation_digestはActiveRecordのやつ
     self.activation_digest = User.digest(activation_token)
   end
-
-
-
 
 
 end
