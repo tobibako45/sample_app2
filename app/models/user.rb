@@ -1,4 +1,8 @@
 class User < ApplicationRecord
+  # ユーザーがマイクロポストを複数所有する (has_many) 関連付け
+  # dependent: :destroyというオプションを使うと、ユーザーが削除されたときに、
+  # そのユーザーに紐付いた (そのユーザーが投稿した) マイクロポストも一緒に削除される
+  has_many :microposts, dependent: :destroy
 
   # remember_token 永続セッションに使う
   # activation_token 有効化に使う
@@ -136,7 +140,6 @@ class User < ApplicationRecord
   end
 
 
-
   # パスワード再設定の期限が切れている場合はtrueを返す
   def password_reset_expired?
     # 現在時刻より２時間以上前(早い)場合
@@ -144,6 +147,11 @@ class User < ApplicationRecord
   end
 
 
+  # 試作feedの定義
+  # 完全な実装は次章の「ユーザーをフォローする」でやる
+  def feed
+    Micropost.where("user_id = ?", id)
+  end
 
 
   private

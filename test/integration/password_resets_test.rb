@@ -157,6 +157,9 @@ class PasswordResetsTest < ActionDispatch::IntegrationTest
                  email: @user.email
              }
          }
+    post password_resets_path,
+         params: { password_reset: { email: @user.email } }
+
     # パスワード再設定フォームのテストのために、アクションを実行結果、インスタンス変数に代入されたオブジェクトを取得
     @user = assigns(:user)
     # reset_sent_at(パスワード再設定メールの送信時間)を３時間前に更新する

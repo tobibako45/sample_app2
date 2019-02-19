@@ -27,7 +27,9 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id])
     # アカウントが有効なユーザーだけ表示、他はroot_urlにリダイレクト
-    redirect_to root_url and return unless @user.activated?
+    # redirect_to root_url and return unless @user.activated?
+
+    @microposts = @user.microposts.paginate(page: params[:page])
     # debugger
   end
 
@@ -99,17 +101,19 @@ class UsersController < ApplicationController
   end
 
 
+  # application_controllerから移動する(Micropostsコントローラでも必要だから)
+
   # ログイン済みユーザーかどうか確認
-  def logged_in_user
-    # ユーザーがログインしていなければ
-    unless logged_in?
-      # アクセスしようとしたURLを覚えておく
-      store_location
-      flash[:danger] = "Please log in. ログインして下さい。"
-      # ログインページへリダイレクト
-      redirect_to login_url
-    end
-  end
+  # def logged_in_user
+  #   # ユーザーがログインしていなければ
+  #   unless logged_in?
+  #     # アクセスしようとしたURLを覚えておく
+  #     store_location
+  #     flash[:danger] = "Please log in. ログインして下さい。"
+  #     # ログインページへリダイレクト
+  #     redirect_to login_url
+  #   end
+  # end
 
 
   # 正しいユーザーかどうか確認
