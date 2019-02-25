@@ -1,0 +1,9 @@
+// JavaScriptと埋め込みRubyを使ってフォローの関係性を作成する
+
+// escape_javascriptメソッドは、JavaScriptファイル内にHTMLを挿入するときに実行結果をエスケープするために必要
+// id=follow_formのHTLM要素を、render('users/unfollow')で更新する。
+$("#follow_form").html("<%= escape_javascript(render('users/unfollow')) %>");
+
+// htmlメソッドは引数の中で指定された要素の内側にあるHTMLを更新します。
+// id=followersのHTML要素を、@user.followers.countの結果で更新する。
+$("#followers").html('<%= @user.followers.count %>');

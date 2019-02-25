@@ -1,0 +1,9 @@
+//Ruby JavaScript (RJS) を使ってフォローの関係性を削除する
+
+// escape_javascriptメソッドは、JavaScriptファイル内にHTMLを挿入するときに実行結果をエスケープするために必要
+// id=follow_formのHTML要素を、'render(‘users/follow’)‘で更新する。
+$("#follow_form").html("<%= escape_javascript(render('users/follow')) %>");
+
+// htmlメソッドは引数の中で指定された要素の内側にあるHTMLを更新します。
+// id=followersのHTML要素を、'@user.followers.count'の結果で更新する
+$("#followers").html('<%= @user.followers.count %>');

@@ -144,7 +144,6 @@ class UserTest < ActiveSupport::TestCase
   end
 
 
-
   # dependent: :destroyのテスト。ユーザーが削除された場合、紐付いたマイクロポストも削除されるか
   test "associated microposts should be destroyed" do
     # ユーザーをDBに保存
@@ -157,6 +156,46 @@ class UserTest < ActiveSupport::TestCase
       @user.destroy
     end
   end
+
+
+  # 正しいフィード
+  test "feed should have the right posts" do
+    # fixtuerからmichaelの情報を取得
+    michael = users(:michael)
+    # fixtuerからarcherの情報を取得
+    archer = users(:archer)
+    # fixtuerからlanaの情報を取得
+    lana = users(:lana)
+
+    # フォローしているユーザーの投稿を確認
+
+    # lanaのマイクロポストを取得
+    lana.microposts.each do |post_following|
+      # michaelのフィードに含まれていること確認
+      assert michael.feed.include?(post_following)
+    end
+
+    # 自分自身の投稿を確認
+
+    # michaelのマイクロポストを取得
+    michael.microposts.each do |post_self|
+      # michael（自分自身）のフィードが含まれているか確認
+      assert michael.feed.include?(post_self)
+    end
+
+    # フォローしていないユーザーの投稿を確認
+
+    # archerのマイクロポストを取得
+    archer.microposts.each do |post_unfollowed|
+      # michael（フォローしていない）のマイクロポストが含まれていないか確認
+      assert_not michael.feed.include?(post_unfollowed)
+    end
+
+
+
+  end
+
+
 
 
 end

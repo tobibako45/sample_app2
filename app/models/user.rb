@@ -4,6 +4,33 @@ class User < ApplicationRecord
   # そのユーザーに紐付いた (そのユーザーが投稿した) マイクロポストも一緒に削除される
   has_many :microposts, dependent: :destroy
 
+
+  # 能動的関係に対して1対多 (has_many) の関連付けを実装する
+  # active_relationships 能動的関係であることを示す為に名前付け。
+  # class_name: "Relationship" 明示的にクラス名の名称を指定。
+  # foreign_key: "follower_id" 明示的に外部キーの名称を指定。
+  # dependent: :destroy ユーザーを削除したら、ユーザーのrelationshipも削除される設定
+  has_many :active_relationships, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
+
+  # 受動的関係を使ってuser.followersを実装する。
+  # passive_relationships 名前付け
+  # class_name: "Relationship" 明示的にクラス名の名称を指定。
+  # foreign_key: "followed_id" 明示的に外部キーの名称を指定。
+  # dependent: :destroy ユーザーを削除したら、ユーザーのrelationshipも削除される設定
+  has_many :passive_relationships, class_name: "Relationship", foreign_key: "followed_id", dependent: :destroy
+
+  # has_many throughのデフォルトの上書き
+  # sourceで、「following配列の元はfollowed idの集合である」ということを明示的に
+  has_many :following, through: :active_relationships, source: :followed
+
+  # has_many throughのデフォルトの上書き
+  # sourceで、「followers配列の元はfollower idの集合である」ということを明示的に
+  has_many :followers, through: :passive_relationships, source: :follower
+  # source: :followerを省略することも可能。 has_many :followersと記述した場合、
+  # Railsは自動的にfollowersを単数形のfollowerに変換して、follower_idを探してくれる。
+  # 今回は、has_many :followingとの類似性を強調するために、 あえて記述している。
+
+
   # remember_token 永続セッションに使う
   # activation_token 有効化に使う
   # reset_token パスワード再設定に使う
@@ -149,9 +176,61 @@ class User < ApplicationRecord
 
   # 試作feedの定義
   # 完全な実装は次章の「ユーザーをフォローする」でやる
+  # def feed
+  #   Micropost.where("user_id = ?", id)
+  # end
+
+
+  # ユーザーのステータスフィードを返す（サブセレクト前）
+  # def feed
+    # following_idsメソッドは、has_many :followingの関連付けしたときに、ActiveRecordが自動生成したもの。
+    # これにより、user.following(userがフォローしているユーザー)のidが配列として扱える。
+    # 関連付けしている名前の末尾に _ids を付け足すだけで使える。
+    # Micropost.where("user_id IN (?) OR user_id = ?", following_ids, id)
+
+    # 自分自身のマイクロポストを含めない場合
+    # Micropost.where("user_id IN (?)", following_ids)
+
+    # 自分自身のマイクロポストだけ
+    # Micropost.where("user_id = ?", id)
+
+    # フォローしていないユーザーのも含めたマイクロポスト(すなわち、全て)
+    # Micropost.all
+
+    # リファクタリング。変数にキーと値のペアを使う
+    # Micropost.where("user_id IN (:following_ids) OR user_id = :user_id",
+    #                 following_ids: following_ids, user_id: id)
+  # end
+
+  # ユーザーのステータスフィードを返す（サブセレクト版）
   def feed
-    Micropost.where("user_id = ?", id)
+    # サブセレクトを文字列として代入
+    # following_idsという文字列はエスケープされているのではなく、見やすさのために式展開しているだけだという点に注意
+    following_ids = "SELECT followed_id FROM relationships WHERE follower_id = :user_id"
+    Micropost.where("user_id IN (#{following_ids}) OR user_id = :user_id", user_id: id)
+
+    # SELECT * FROM microposts
+    # WHERE user_id IN (SELECT followed_id FROM relationships WHERE  follower_id = 1)
+    # OR user_id = 1
   end
+
+
+
+  # ユーザーをフォローする
+  def follow(other_user)
+    following << other_user
+  end
+
+  # ユーザーをフォロー解除する
+  def unfollow(other_user)
+    active_relationships.find_by(followed_id: other_user.id).destroy
+  end
+
+  # 現在のユーザーがフォローしてたらtrueを返す
+  def following?(other_user)
+    following.include?(other_user)
+  end
+
 
 
   private

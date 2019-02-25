@@ -3,7 +3,7 @@ class UsersController < ApplicationController
 
   # editとupdateだけ、先にlogged_in_userを実行
   # ログインしないでアクセスした時
-  before_action :logged_in_user, only: [:index, :edit, :update, :destroy]
+  before_action :logged_in_user, only: [:index, :edit, :update, :destroy, :following, :followers]
 
   # editとupdateだけ、正しいユーザーかどうか確認
   before_action :correct_user, only: [:edit, :update]
@@ -12,6 +12,7 @@ class UsersController < ApplicationController
   before_action :admin_user, only: :destroy
 
 
+  # ユーザー一覧
   def index
     # ユーザー全件
     # @users = User.all
@@ -23,7 +24,7 @@ class UsersController < ApplicationController
     @users = User.where(activated: true).paginate(page: params[:page])
   end
 
-
+  # ユーザー詳細
   def show
     @user = User.find(params[:id])
     # アカウントが有効なユーザーだけ表示、他はroot_urlにリダイレクト
@@ -33,11 +34,13 @@ class UsersController < ApplicationController
     # debugger
   end
 
+  # 新規登録画面
   def new
     @user = User.new
     # debugger
   end
 
+  # 新規登録
   def create
     # @user = User.new(params[:user])
     # Strong Parametersで、指定した属性意外は許可しない
@@ -66,12 +69,12 @@ class UsersController < ApplicationController
 
   end
 
-
+  # 編集画面
   def edit
     @user = User.find(params[:id])
   end
 
-
+  # 編集
   def update
     @user = User.find(params[:id])
     if @user.update_attributes(user_params)
@@ -82,7 +85,7 @@ class UsersController < ApplicationController
     end
   end
 
-
+  # 削除
   def destroy
     # DBから検索して削除
     User.find(params[:id]).destroy
@@ -90,6 +93,32 @@ class UsersController < ApplicationController
     # ユーザー一覧にリダイレクト
     redirect_to users_url
   end
+
+  # フォロー一覧
+  def following
+    @title = "Following"
+    # ユーザーを検索して代入
+    @user = User.find(params[:id])
+    # ユーザーのフォローしているユーザー一覧を取得して代入
+    @users = @user.following.paginate(page: params[:page])
+    # show_follow.html.erbを呼び出す
+    render 'show_follow'
+  end
+
+  # フォロワー一覧
+  def followers
+    @title = "Followers"
+    # ユーザーを検索して代入
+    @user = User.find(params[:id])
+    # ユーザーのフォロワー一覧を取得して代入
+    @users = @user.followers.paginate(page: params[:page])
+    # show_follow.html.erbを呼び出す
+    render 'show_follow'
+  end
+
+
+
+
 
 
   private

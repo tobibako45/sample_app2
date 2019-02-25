@@ -1,9 +1,7 @@
 Rails.application.routes.draw do
 
   get 'password_resets/new'
-
   get 'password_resets/edit'
-
   get 'sessions/new'
 
   # root 'application#hello'
@@ -24,14 +22,24 @@ Rails.application.routes.draw do
   post '/login', to: 'sessions#create'
   delete '/logout', to: 'sessions#destroy'
 
-  resources :users
+  # ユーザーのリソースのルーティング
+  # resources :users
+
+  # memberは、メンバールーティング（users/:id/followingのようにidを伴うパス）を追加するときに使う
+  resources :users do
+    member do
+      # users/:id/following と users/:id/followers が使えるようになる
+      get :following, :followers
+    end
+  end
 
   # アカウント有効化(editアクションを追加)
   resources :account_activations, only: [:edit]
   # パスワード再設定用リソースのルーティング
   resources :password_resets, only: [:new, :create, :edit, :update]
-  # マイクロポストのリソースのルーティング
+  # micropostリソース用のルーティング
   resources :microposts, only: [:create, :destroy]
-
+  # relationshipリソース用のルーティング
+  resources :relationships, only: [:create, :destroy]
 
 end

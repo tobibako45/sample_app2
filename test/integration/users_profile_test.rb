@@ -33,7 +33,27 @@ class UsersProfileTest < ActionDispatch::IntegrationTest
     end
     # will_paginateが１度のみ表示されていること
     assert_select 'div.pagination', count: 1
+
+
+    # 14章で追加
+
+    # @userのフォロー(following)の数が、HTML内にあるかチェック
+    assert_match @user.active_relationships.count.to_s, response.body
+    # @userのフォロワー(followers)の数が、HTML内にあるかチェック
+    assert_match @user.passive_relationships.count.to_s, response.body
   end
 
+
+  # homeページの、フォロー(following)の数とフォロワー(followers)の数のテスト
+  test "count relationships" do
+    # ログイン
+    log_in_as(@user)
+    # root_urlにリダイレクト
+    get root_path
+    # @userのフォロー(following)の数が、HTML内にあるかチェック
+    assert_match @user.active_relationships.count.to_s, response.body
+    # @userのフォロワー(followers)の数が、HTML内にあるかチェック
+    assert_match @user.passive_relationships.count.to_s, response.body
+  end
 
 end

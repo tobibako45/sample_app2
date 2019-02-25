@@ -9,7 +9,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   # ログインしていない時、indexにリダイレクトする
   test "should redirect index when not logged in" do
-    # ユーザー一覧にアクセス
+    # GETリクエスト送信。/users(users#index)
     get users_path
     # ログインページにリダイレクトするか確認
     assert_redirected_to login_url
@@ -17,14 +17,16 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
 
   test "should get new" do
+    # GETリクエスト送信。/signup(users#new)
     get signup_path
+    # レスポンスが成功したかを検証
     assert_response :success
   end
 
 
   # ログインしていない時は、編集ページにリダイレクトする
   test "should redirect edit when not logged in" do
-    # GETリクエストで/users/:id/editにアクセス
+    # GETリクエスト送信。/users/:id/edit(users#edit)
     get edit_user_path(@user)
     # flashメッセージが空でないことをチェック
     assert_not flash.empty?
@@ -34,7 +36,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   # ログインしていない時は、アップデートにリダイレクトする
   test "should redirect update when not logged in" do
-    # user_pathに、PATCHリクエストとユーザー情報を送信
+    # PATCHリクエスト送信(ユーザー情報を送信)。/users/:id(users#update)
+    # @userの名前、emailを更新する
     patch user_path(@user),
           params: {
               user: {
@@ -54,7 +57,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "should redirect edit when logged in as wrong user" do
     # other_userでログイン
     log_in_as(@other_user)
-    # @userの編集画面へアクセス
+    # GETリクエスト送信。/users/:id/edit(users#edit)
     get edit_user_path(@user)
     # flashメッセージが空なとこを確認
     assert flash.empty?
@@ -67,7 +70,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "should redirect update when logged in as wrong user" do
     # other_userでログイン
     log_in_as(@other_user)
-    # user_pathに、PATCHリクエストとユーザー情報を送信
+    # PATCHリクエスト送信(ユーザー情報を送信)。/users/:id(users#update)
+    # @userの名前、emailを更新する
     patch user_path(@user), params: {
         user: {
             name: @user.name,
@@ -87,7 +91,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     log_in_as(@other_user)
     # @other_userがtrue(管理者)でないことを確認
     assert_not @other_user.admin?
-    # PATCHリクエストで、@other_userのパスワード、パスワード確認、管理ユーザ属性を更新する
+    # PATCHリクエスト送信(ユーザー情報を送信)。/users/:id(users#update)
+    # @other_userのパスワード、パスワード確認、管理ユーザ属性を更新する
     patch user_path(@other_user), params: {
         user: {
             password: @other_user.password,
@@ -104,7 +109,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "should redirect destroy when not logged in" do
     # ユーザー数が変わっていないか確認
     assert_no_difference 'User.count' do
-      # user_pathにDELETEリクエスト
+      # DELETEリクエスト送信。/users/:id(users#destroy)
       delete user_path(@user)
     end
     # ログイン画面にリダイレクト
@@ -112,18 +117,34 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   end
 
 
-  # 非管理者としてログインした場合はリダイレクトする必要があります
+  # 非管理者としてログインした場合はリダイレクトされる
   test "should redirect when logged in as a non-admin" do
     # @other_user（非管理）でログイン
     log_in_as(@other_user)
     # ユーザー数が変わっていないか確認
     assert_no_difference 'User.count' do
-      # user_pathにDELETEリクエスト
+      # DELETEリクエスト送信。/users/:id(users#destroy)
       delete user_path(@user)
     end
-    # root_urlにリダイレクト
+    # root_url(static_pages#home)にリダイレクト
     assert_redirected_to root_url
   end
 
+
+  # followingページには、ログインしていないときはログインページにリダイレクトされること
+  test "should redirect following when not logged in" do
+    # GETリクエスト送信。/users/:id/following(users#following)
+    get following_user_path(@user)
+    # login_url(sessions#new)にリダイレクトされること
+    assert_redirected_to login_url
+  end
+
+  # followersページには、ログインしていないときはログインページにリダイレクトされること
+  test "should redirect followers when not logged in" do
+    # GETリクエスト送信。/users/:id/followers(users#followers)
+    get followers_user_path(@user)
+    # login_url(sessions#new)にリダイレクトされること
+    assert_redirected_to login_url
+  end
 
 end
